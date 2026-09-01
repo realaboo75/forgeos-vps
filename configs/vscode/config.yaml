@@ -1,0 +1,6 @@
+# VS Code / code-server Configuration
+# Installed at: /home/ubuntu/.config/code-server/config.yaml
+
+bind-addr: 0.0.0.0:8443
+auth: none
+cert: false

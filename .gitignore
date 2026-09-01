@@ -1,0 +1,71 @@
+# Secrets & credentials
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+.env
+.env.local
+.env.production
+*.secret
+*_key
+*_token
+*_password
+
+# SSH keys
+id_rsa*
+vps_key
+ssh_host_*
+authorized_keys
+
+# SSL certificates
+*.ssl
+ssl/
+certs/
+/etc/nginx/ssl/
+
+# Databases
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+
+# Model artifacts & datasets
+*.safetensors
+*.bin
+*.pt
+*.pth
+*.onnx
+*.gguf
+dataset.jsonl
+models/
+output/
+trained/
+
+# Runtime artifacts
+*.log
+logs/
+__pycache__/
+*.pyc
+node_modules/
+.target/
+dist/
+build/
+
+# OS
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# Docker runtime
+docker-compose.override.yml
+
+# Large files
+*.tar.gz
+*.zip
+*.tar
+*.whl

@@ -1,0 +1,97 @@
+# Trinity Agent Orchestration Platform — Docker Compose
+# Deploy: docker compose -f docker-compose.trinity.yml up -d
+
+services:
+  trinity-backend:
+    image: trinity-backend:latest
+    container_name: trinity-backend
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8000:8000"
+    volumes:
+      - /home/ubuntu/trinity/src/backend:/app:rw
+      - /home/ubuntu/trinity/config/process-templates:/agent-configs/process-templates:ro
+      - /home/ubuntu/trinity/config/manifests:/app/config/manifests:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      - REDIS_URL=redis://:${TRINITY_REDIS_PASSWORD}@127.0.0.1:6379
+      - INTERNAL_API_SECRET=${TRINITY_INTERNAL_API_SECRET}
+    networks:
+      - trinity-platform-network
+
+  trinity-frontend:
+    image: trinity-frontend:latest
+    container_name: trinity-frontend
+    restart: unless-stopped
+    ports:
+      - "0.0.0.0:8090:80"
+    depends_on:
+      - trinity-backend
+
+  trinity-redis:
+    image: redis:7-alpine
+    container_name: trinity-redis
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:6379:6379"
+    command: redis-server --requirepass ${TRINITY_REDIS_PASSWORD}
+    volumes:
+      - trinity_redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${TRINITY_REDIS_PASSWORD}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    networks:
+      - trinity-platform-network
+
+  trinity-mcp-server:
+    image: trinity-mcp-server
+    container_name: trinity-mcp-server
+    restart: unless-stopped
+    ports:
+      - "0.0.0.0:8080:8080"
+    environment:
+      - MCP_CHAT_TIMEOUT_MS=25000
+      - TRINITY_USERNAME=admin
+      - TRINITY_PASSWORD=${TRINITY_PASSWORD}
+      - INTERNAL_API_SECRET=${TRINITY_INTERNAL_API_SECRET}
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8080/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+  trinity-otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.120.0
+    container_name: trinity-otel-collector
+    restart: unless-stopped
+    ports:
+      - "0.0.0.0:4317:4317"
+      - "0.0.0.0:4318:4318"
+      - "0.0.0.0:8889:8889"
+      - "0.0.0.0:13133:13133"
+
+  trinity-vector:
+    image: timberio/vector:0.43.1-alpine
+    container_name: trinity-vector
+    restart: unless-stopped
+    ports:
+      - "0.0.0.0:8686:8686"
+
+  trinity-scheduler:
+    image: trinity-scheduler
+    container_name: trinity-scheduler
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8000/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+volumes:
+  trinity_redis-data:
+
+networks:
+  trinity-platform-network:
+    driver: bridge

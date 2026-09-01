@@ -1,0 +1,102 @@
+# Kortix / Supabase Stack — Docker Compose
+# Deploy: docker compose -f docker-compose.kortix.yml up -d
+
+services:
+  kortix-api:
+    image: kortix/kortix-api:0.11.0
+    container_name: kortix-default-kortix-api-1
+    restart: unless-stopped
+    ports:
+      - "0.0.0.0:13738:8008"
+
+  kortix-frontend:
+    image: kortix/kortix-frontend:0.11.0
+    container_name: kortix-default-frontend-1
+    restart: unless-stopped
+    ports:
+      - "0.0.0.0:13737:3000"
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:3000/"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+  supabase-db:
+    image: supabase/postgres:17.6.1.136
+    container_name: kortix-default-supabase-db-1
+    restart: unless-stopped
+
+  supabase-kong:
+    image: kong/kong:3.9.1
+    container_name: kortix-default-supabase-kong-1
+    restart: unless-stopped
+    ports:
+      - "0.0.0.0:13740:8000"
+
+  supabase-auth:
+    image: supabase/gotrue:v2.189.0
+    container_name: kortix-default-supabase-auth-1
+    restart: unless-stopped
+
+  supabase-rest:
+    image: postgrest/postgrest:v14.12
+    container_name: kortix-default-supabase-rest-1
+    restart: unless-stopped
+
+  supabase-realtime:
+    image: supabase/realtime:v2.102.3
+    container_name: kortix-default-supabase-realtime-1
+    restart: unless-stopped
+
+  supabase-storage:
+    image: supabase/storage-api:v1.60.4
+    container_name: kortix-default-supabase-storage-1
+    restart: unless-stopped
+
+  supabase-functions:
+    image: supabase/edge-runtime:v1.74.0
+    container_name: kortix-default-supabase-functions-1
+    restart: unless-stopped
+
+  supabase-analytics:
+    image: supabase/logflare:1.43.1
+    container_name: kortix-default-supabase-analytics-1
+    restart: unless-stopped
+
+  supabase-meta:
+    image: supabase/postgres-meta:v0.96.6
+    container_name: kortix-default-supabase-meta-1
+    restart: unless-stopped
+
+  supabase-studio:
+    image: supabase/studio:2026.07.07-sha-a6a04f2
+    container_name: kortix-default-supabase-studio-1
+    restart: unless-stopped
+
+  supabase-vector:
+    image: timberio/vector:0.53.0-alpine
+    container_name: kortix-default-supabase-vector-1
+    restart: unless-stopped
+
+  supabase-imgproxy:
+    image: darthsim/imgproxy:v3.30.1
+    container_name: kortix-default-supabase-imgproxy-1
+    restart: unless-stopped
+
+  supabase-supavisor:
+    image: supabase/supavisor:2.9.5
+    container_name: kortix-default-supabase-supavisor-1
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:13741:5432"
+      - "127.0.0.1:13742:6543"
+
+  llm-gateway:
+    image: kortix/kortix-gateway:0.11.0
+    container_name: kortix-default-llm-gateway-1
+    restart: unless-stopped
+
+  kortix-updater:
+    image: docker:29.6.1-cli
+    container_name: kortix-default-kortix-updater-1
+    restart: unless-stopped
